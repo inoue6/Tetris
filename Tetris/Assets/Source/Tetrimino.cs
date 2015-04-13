@@ -231,7 +231,6 @@ public class Tetrimino : MonoBehaviour {
 
 	// ブロックを回転させる
 	void RotateBulock() {
-		int dx, dy;
 		if (Input.GetKeyDown (KeyCode.S)) {
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
@@ -240,6 +239,9 @@ public class Tetrimino : MonoBehaviour {
 				for (int y = 0; y < 5; y++) {
 					for (int x = 0; x < 5; x++) {
 						after.form [4 - x, y] = block.form [y, x];
+						if (after.form [4 - x, y]) {
+							//Debug.Log ("X:"+x+"Y:"+y);
+						}
 					}
 				}
 				
