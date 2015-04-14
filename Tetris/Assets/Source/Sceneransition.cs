@@ -8,51 +8,69 @@ public class Sceneransition : MonoBehaviour {
 		RESULT,
 	}
 	public TransitionScene scene;
-	/*float time;
-	public GameObject blackTexture;
-	float alpha;*/
+	float fadeAlpha = 0;
+	bool isFading = false;
+	public Color fadeColor = Color.black;
+
 
 	// Use this for initialization
 	void Start () {
-		/*time = 0.0f;
-		alpha = 0;*/
+
 	}
 
 	// Update is called once per frame
-	void Update () {
-		if (Input.GetKeyDown (KeyCode.Space)) {
-
-			/*time = 0.0f;
-			while (true) {
-				this.alpha = Mathf.Lerp (0.0f, 1.0f, time / 1.0f);
-				blackTexture.
-				time += Time.deltaTime;
-				if (time >= 1.0f) {
-					break;
-				}
-			}*/
-
-			switch (scene) {
-			case TransitionScene.TITLE:
-				Application.LoadLevel ("Title");
-				break;
-			case TransitionScene.GAMEMAIN:
-				Application.LoadLevel ("GameMain");
-				break;
-			case TransitionScene.RESULT:
-				Application.LoadLevel ("Result");
-				break;
-			}
-
-			/*time = 0.0f;
-			while (true) {
-				this.alpha = Mathf.Lerp (1.0f, 0.0f, time / 1.0f);
-				time += Time.deltaTime;
-
-				if (time >= 1.0f) {
-					break;
-				}
-			}*/
+	public void OnGUI () {
+		if (this.isFading) {
+			//色と透明度を更新して白テクスチャを描画 .
+			this.fadeColor.a = this.fadeAlpha;
+			GUI.color = this.fadeColor;
+			GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
 		}
+		if (Input.GetKeyDown (KeyCode.Return)) {
+			LoadLevel ();
+		}
+	}
+
+	public void LoadLevel ()
+	{
+		StartCoroutine (TransScene ());
+	}
+
+	IEnumerator TransScene ()
+	{
+		//だんだん暗く
+		this.isFading = true;
+		float time = 0;
+		while (time <= 1.0f) {
+			this.fadeAlpha = Mathf.Lerp (0f, 1f, time / 1.0f);      
+			time += Time.deltaTime;
+			yield return 0;
+		}
+
+		//シーン切替
+		switch (scene) {
+		case TransitionScene.TITLE:
+			Application.LoadLevel ("Title");
+			Debug.Log ("Title");
+			break;
+		case TransitionScene.GAMEMAIN:
+			Application.LoadLevel ("GameMain");
+			Debug.Log ("GameMain");
+			break;
+		case TransitionScene.RESULT:
+			Application.LoadLevel ("Result");
+			Debug.Log ("Result");
+			break;
+		}
+
+		//だんだん明るく
+		time = 0;
+		while (time <= 1.0f) {
+			this.fadeAlpha = Mathf.Lerp (1f, 0f, time / 1.0f);
+			time += Time.deltaTime;
+			yield return 0;
+		}
+
+		//this.isFading = false;
 	}
 }
