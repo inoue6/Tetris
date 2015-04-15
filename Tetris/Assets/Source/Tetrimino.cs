@@ -101,7 +101,7 @@ public class Tetrimino : MonoBehaviour {
 
 		if (blockCount >= 20) {
 			if (spd > 0.01f) {
-				spd /= 2;
+				spd -= 0.01f;
 			} else {
 				spd = 0.01f;
 			}
@@ -285,7 +285,7 @@ public class Tetrimino : MonoBehaviour {
 			if (x < 2 || x > 11) {
 				return true;
 			}
-			if (y < 2 || y > 21) {
+			if (y < 1 || y > 21) {
 				return true;
 			}
 			if (blockMass.there [y, x]) {

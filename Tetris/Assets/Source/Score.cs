@@ -9,6 +9,7 @@ public class Score : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		DontDestroyOnLoad (this);
 		Initialize ();
 	}
 	
@@ -35,20 +36,22 @@ public class Score : MonoBehaviour {
 	// スピードボーナス変更
 	public void ChangeSpdBonus(float spd) {
 		// 現在のスピードにより変更
-		if (spd <= 1 && spd > 0.5f) {
+		if (spd <= 1 && spd > 0.8f) {
 			speedBonus = 1;
-		} else if (spd <= 0.5f && spd > 0.25f) {
+		} else if (spd <= 0.8f && spd > 0.6f) {
 			speedBonus = 1.5f;
-		} else if (spd <= 0.25f && spd > 0.125f) {
+		} else if (spd <= 0.6f && spd > 0.5f) {
 			speedBonus = 2;
-		} else if (spd <= 0.125f && spd > 0.0625f) {
+		} else if (spd <= 0.5f && spd > 0.4f) {
 			speedBonus = 2.5f;
-		} else if (spd <= 0.0625f && spd > 0.03125f) {
+		} else if (spd <= 0.4f && spd > 0.3f) {
 			speedBonus = 3;
-		} else if (spd <= 0.03125f && spd > 0.015625f) {
+		} else if (spd <= 0.3f && spd > 0.2f) {
 			speedBonus = 3.5f;
-		} else if (spd <= 0.015625f && spd >= 0.01f) {
+		} else if (spd <= 0.2f && spd >= 0.1f) {
 			speedBonus = 4;
+		} else if (spd <= 0.1) {
+			speedBonus = 6;
 		}
 	}
 

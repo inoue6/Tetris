@@ -28,6 +28,9 @@ public class SceneTransition : MonoBehaviour {
 		}
 		if (scene != TransitionScene.RESULT) {
 			if (Input.GetKeyDown (KeyCode.Return)) {
+				if(GameObject.Find ("ScoreNum") != null) {
+					Destroy (GameObject.Find ("ScoreNum"));
+				}
 				LoadLevel ();
 			}
 		}
