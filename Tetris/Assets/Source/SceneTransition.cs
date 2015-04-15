@@ -1,21 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Sceneransition : MonoBehaviour {
+public class SceneTransition : MonoBehaviour {
 	public enum TransitionScene {
 		TITLE,
 		GAMEMAIN,
 		RESULT,
 	}
+	public GameObject obj;
 	public TransitionScene scene;
 	float fadeAlpha = 0;
 	bool isFading = false;
 	public Color fadeColor = Color.black;
 
-
 	// Use this for initialization
 	void Start () {
-
+		DontDestroyOnLoad (this);
 	}
 
 	// Update is called once per frame
@@ -26,8 +26,10 @@ public class Sceneransition : MonoBehaviour {
 			GUI.color = this.fadeColor;
 			GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
 		}
-		if (Input.GetKeyDown (KeyCode.Return)) {
-			LoadLevel ();
+		if (scene != TransitionScene.RESULT) {
+			if (Input.GetKeyDown (KeyCode.Return)) {
+				LoadLevel ();
+			}
 		}
 	}
 
@@ -70,6 +72,7 @@ public class Sceneransition : MonoBehaviour {
 			time += Time.deltaTime;
 			yield return 0;
 		}
+		Destroy (obj);
 
 		//this.isFading = false;
 	}

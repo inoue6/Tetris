@@ -6,6 +6,7 @@ public class Score : MonoBehaviour {
 	int score;
 	float speedBonus;
 	float erasesBonus;
+
 	// Use this for initialization
 	void Start () {
 		Initialize ();

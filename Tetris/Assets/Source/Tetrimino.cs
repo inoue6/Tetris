@@ -36,6 +36,12 @@ public class Tetrimino : MonoBehaviour {
 	};
 
 	public Score score;
+	public GameObject text;
+	public SceneTransition st;
+	public GameObject texture;
+
+	bool generat;			// 落下防止
+	bool description;		// 操作説明
 
 	bool[,,] form = new bool[7, HEIGHT, WIDE];	// それぞれの形
 
@@ -43,37 +49,54 @@ public class Tetrimino : MonoBehaviour {
 
 	Block block;			// 落下してくるブロック
 	Blockmass blockMass;	// ブロックの塊
-	GameObject[] gost;
+	public GameObject gost1;
+	public GameObject gost2;
+	public GameObject gost3;
+	public GameObject gost4;
 	int blockCount;			// 落下していったブロックの数
 	float spd;				// 
 	float spdTime;
+	public bool gameOver;
 
 	// Use this for initialization
 	void Start () {
 		FormInit ();
 		OederDecision ();
 
-		gost = new GameObject[4];
-		for (int i = 0; i < 4; i++) {
-			gost [i] = GameObject.CreatePrimitive (PrimitiveType.Cube);
-		}
-
 		spd = 1.0f;
-		spdTime = Time.time;
 		GeneratTetrimino ();
+
+		description = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (description) {
+			if(Input.GetKey(KeyCode.Return)) {
+				description = false;
+				texture.transform.position = new Vector3(100, 0, 0);
+				spdTime = Time.time;
+			}
+			return;
+		}
 		BlockMove ();
 		RotateBulock ();
 
-		if (Input.GetKey (KeyCode.DownArrow)) {
+		if (!generat && Input.GetKey (KeyCode.DownArrow)) {
 			block.spd = 0.01f;
 		}
+
 		if((Time.time - spdTime) >= block.spd) {
 			FallTetrimino ();
 			spdTime = Time.time;
+		}
+
+		if (gameOver) {
+			text.transform.position = new Vector3(0.1f, 0.7f, 0);
+			if(Input.GetKeyDown (KeyCode.Return)) {
+				st.LoadLevel();
+			}
+			return;
 		}
 
 		if (blockCount >= 20) {
@@ -149,7 +172,7 @@ public class Tetrimino : MonoBehaviour {
 		}
 		blockMass.blockPos.x = 4;
 		blockMass.blockPos.y = 0;
-		blockMass.top = 0;
+		blockMass.top = 22;
 	}
 
 	// １０個先までの出てくるパターンを決める
@@ -157,13 +180,14 @@ public class Tetrimino : MonoBehaviour {
 		int rnd;
 		for (int i = 0; i < 10; i++) {
 			rnd = Random.Range (I_TETRIMINO, T_TETRIMINO + 1);
-			order.AddLast (0);
+			order.AddLast (rnd);
 		}
 	}
 
 	// ブロック生成
 	void GeneratTetrimino() {
-		block = new Block();
+		generat = true;
+		block = new Block ();
 		block.cubes = new Cube[4];
 		block.form = new bool[5, 5];
 		blockCount++;
@@ -184,17 +208,23 @@ public class Tetrimino : MonoBehaviour {
 		// スピード
 		block.spd = spd;
 
+		blockMass.blockPos.x = 4;
+		blockMass.blockPos.y = 0;
+
+		if (CollisionBlocks (block, 0, 0)) {
+			gameOver = true;
+			return;
+		}
+
 		// オブジェクト配置
 		for (int i = 0; i < 4; i++) {
 			block.cubes[i].cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 		}
 		SetPosCube ();
-		blockMass.blockPos.x = 4;
-		blockMass.blockPos.y = 0;
 
 		order.RemoveFirst ();
 		int rnd = Random.Range (I_TETRIMINO, T_TETRIMINO + 1);
-		order.AddLast (0);
+		order.AddLast (rnd);
 
 		SetGost ();
 	}
@@ -233,11 +263,6 @@ public class Tetrimino : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.RightArrow)) {
 			if (!CollisionBlocks (block, 1, 0)) {
 				block.pos.x += 1.0f;
-				for (int i = 0; i < 4; i++) {
-					float x = block.pos.x + block.cubes[i].cubePos.x;
-					float y = block.pos.y + block.cubes[i].cubePos.y;
-					block.cubes[i].cube.transform.position = new Vector3 (x, y, 8);
-				}
 				blockMass.blockPos.x += 1;
 			}
 		}
@@ -245,11 +270,6 @@ public class Tetrimino : MonoBehaviour {
 		if (Input.GetKeyDown (KeyCode.LeftArrow)) {
 			if (!CollisionBlocks (block, -1, 0)) {
 				block.pos.x -= 1.0f;
-				for (int i = 0; i < 4; i++) {
-					float x = block.pos.x + block.cubes[i].cubePos.x;
-					float y = block.pos.y + block.cubes[i].cubePos.y;
-					block.cubes[i].cube.transform.position = new Vector3 (x, y, 8);
-				}
 				blockMass.blockPos.x -= 1;
 			}
 		}
@@ -341,14 +361,10 @@ public class Tetrimino : MonoBehaviour {
 	void FallTetrimino() {
 		if (!CollisionBlocks (block, 0, 1)) {
 			block.pos.y -= 1.0f;
-			for (int i = 0; i < 4; i++) {
-				float x = block.pos.x + block.cubes[i].cubePos.x;
-				float y = block.pos.y + block.cubes[i].cubePos.y;
-				block.cubes [i].placePos.x = x;
-				block.cubes [i].placePos.y = y;
-				block.cubes[i].cube.transform.position = new Vector3 (x, y, 8);
-			}
 			blockMass.blockPos.y += 1;
+			if(generat) {
+				generat = false;
+			}
 		} else {
 			int x;
 			int y;
@@ -379,13 +395,16 @@ public class Tetrimino : MonoBehaviour {
 					for (int x = 2; x < 12; x++) {
 						Destroy (blockMass.blocks [y, x].cube);
 						blockMass.there [y, x] = false;
+						blockMass.blocks[y, x].cube = null;
+						blockMass.blocks[y, x].cubePos = new Vector2(0, 0);
+						blockMass.blocks[y, x].placePos = new Vector2(0, 0);
 					}
 					for (int fy = y; fy > blockMass.top; fy--) {
 						for(int x = 2; x < 12; x++) {
 							blockMass.there [fy, x] = blockMass.there [fy - 1, x];
 							blockMass.there [fy - 1, x] = false;
 							blockMass.blocks [fy, x] = blockMass.blocks [fy - 1, x];
-							if (blockMass.blocks [fy, x].cube == null) {
+							if (!blockMass.there [fy, x]) {
 								continue;
 							}
 							float px = blockMass.blocks[fy, x].placePos.x;
@@ -394,7 +413,7 @@ public class Tetrimino : MonoBehaviour {
 							blockMass.blocks [fy, x].cube.transform.position = new Vector3 (px, py, 8);
 						}
 					}
-					blockMass.top++;
+					blockMass.top--;
 					num++;
 				}
 			}
@@ -409,15 +428,24 @@ public class Tetrimino : MonoBehaviour {
 		int dy;
 		for (dy = 0; dy < 22; dy++) {
 			if (CollisionBlocks (block, 0, dy)) {
-				//Debug.Log (dy);
 				break;
 			}
 		}
 
-		for (int i = 0; i < 4; i++) {
-			float x = block.pos.x + block.cubes [i].cubePos.x;
-			float y = block.pos.y + 3.5f - block.cubes [i].cubePos.y - dy + 1;
-			gost [i].transform.position = new Vector3 (x, y, 8);
-		}
+		float x = block.pos.x + block.cubes [0].cubePos.x;
+		float y = block.pos.y + 3.5f - block.cubes [0].cubePos.y - dy + 1;
+		gost1.transform.position = new Vector3 (x, y, 8);
+
+		x = block.pos.x + block.cubes [1].cubePos.x;
+		y = block.pos.y + 3.5f - block.cubes [1].cubePos.y - dy + 1;
+		gost2.transform.position = new Vector3 (x, y, 8);
+
+		x = block.pos.x + block.cubes [2].cubePos.x;
+		y = block.pos.y + 3.5f - block.cubes [2].cubePos.y - dy + 1;
+		gost3.transform.position = new Vector3 (x, y, 8);
+
+		x = block.pos.x + block.cubes [3].cubePos.x;
+		y = block.pos.y + 3.5f - block.cubes [3].cubePos.y - dy + 1;
+		gost4.transform.position = new Vector3 (x, y, 8);
 	}
 }
