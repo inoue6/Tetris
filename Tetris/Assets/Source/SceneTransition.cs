@@ -12,6 +12,7 @@ public class SceneTransition : MonoBehaviour {
 	float fadeAlpha = 0;
 	bool isFading = false;
 	public Color fadeColor = Color.black;
+	public Score score;
 
 	// Use this for initialization
 	void Start () {
@@ -28,9 +29,6 @@ public class SceneTransition : MonoBehaviour {
 		}
 		if (scene != TransitionScene.RESULT) {
 			if (Input.GetKeyDown (KeyCode.Return)) {
-				if(GameObject.Find ("ScoreNum") != null) {
-					Destroy (GameObject.Find ("ScoreNum"));
-				}
 				LoadLevel ();
 			}
 		}
@@ -55,6 +53,7 @@ public class SceneTransition : MonoBehaviour {
 		//シーン切替
 		switch (scene) {
 		case TransitionScene.TITLE:
+			Destroy (GameObject.Find ("ScoreNum"));
 			Application.LoadLevel ("Title");
 			Debug.Log ("Title");
 			break;
@@ -63,6 +62,7 @@ public class SceneTransition : MonoBehaviour {
 			Debug.Log ("GameMain");
 			break;
 		case TransitionScene.RESULT:
+			score.result = true;
 			Application.LoadLevel ("Result");
 			Debug.Log ("Result");
 			break;

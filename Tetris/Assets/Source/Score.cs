@@ -3,9 +3,10 @@ using System.Collections;
 
 public class Score : MonoBehaviour {
 	public GUIText scoreText;
-	int score;
+	long score;
 	float speedBonus;
 	float erasesBonus;
+	public bool result;
 
 	// Use this for initialization
 	void Start () {
@@ -16,6 +17,45 @@ public class Score : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		scoreText.text = score.ToString();
+		if (result) {
+			if (score < 100) {
+				scoreText.transform.position = new Vector3 (0.465f, 0.5f, 0);
+			} else if (score >= 100 && score < 1000) {
+				scoreText.transform.position = new Vector3 (0.39f, 0.5f, 0);
+			} else if (score >= 1000 && score < 10000) {
+				scoreText.transform.position = new Vector3 (0.35f, 0.5f, 0);
+			} else if (score >= 10000 && score < 100000) {
+				scoreText.transform.position = new Vector3 (0.324f, 0.5f, 0);
+			} else if (score >= 100000 && score < 1000000) {
+				scoreText.transform.position = new Vector3 (0.29f, 0.5f, 0);
+			} else if (score >= 1000000 && score < 10000000) {
+				scoreText.transform.position = new Vector3 (0.255f, 0.5f, 0);
+			} else if (score >= 10000000 && score < 100000000) {
+				scoreText.transform.position = new Vector3 (0.22f, 0.5f, 0);
+			} else if (score >= 100000000 && score < 100000000) {
+				scoreText.transform.position = new Vector3 (0.19f, 0.5f, 0);
+			}
+			scoreText.color = new Vector4 (238, 235, 133, 255);
+			scoreText.fontSize = 100;
+		} else {
+			if (score < 100) {
+				scoreText.transform.position = new Vector3 (0.24f, 0.67f, 0);
+			} else if (score >= 100 && score < 1000) {
+				scoreText.transform.position = new Vector3 (0.16f, 0.67f, 0);
+			} else if (score >= 1000 && score < 10000) {
+				scoreText.transform.position = new Vector3 (0.13f, 0.67f, 0);
+			} else if (score >= 10000 && score < 100000) {
+				scoreText.transform.position = new Vector3 (0.10f, 0.67f, 0);
+			} else if (score >= 100000 && score < 1000000) {
+				scoreText.transform.position = new Vector3 (0.07f, 0.67f, 0);
+			} else if (score >= 1000000 && score < 10000000) {
+				scoreText.transform.position = new Vector3 (0.04f, 0.67f, 0);
+			} else if (score >= 10000000 && score < 100000000) {
+				scoreText.transform.position = new Vector3 (0.01f, 0.67f, 0);
+			} else if (score >= 100000000 && score < 100000000) {
+				scoreText.transform.position = new Vector3 (-0.02f, 0.67f, 0);
+			}
+		}
 	}
 
 	// 初期化

@@ -53,6 +53,10 @@ public class Tetrimino : MonoBehaviour {
 	public GameObject gost2;
 	public GameObject gost3;
 	public GameObject gost4;
+	public GameObject nextBlock1;
+	public GameObject nextBlock2;
+	public GameObject nextBlock3;
+	public GameObject nextBlock4;
 	int blockCount;			// 落下していったブロックの数
 	float spd;				// 
 	float spdTime;
@@ -92,14 +96,14 @@ public class Tetrimino : MonoBehaviour {
 		}
 
 		if (gameOver) {
-			text.transform.position = new Vector3(0.1f, 0.7f, 0);
+			text.transform.position = new Vector3(0.12f, 0.7f, 0);
 			if(Input.GetKeyDown (KeyCode.Return)) {
 				st.LoadLevel();
 			}
 			return;
 		}
 
-		if (blockCount >= 20) {
+		if (blockCount >= 10) {
 			if (spd > 0.01f) {
 				spd -= 0.01f;
 			} else {
@@ -223,9 +227,16 @@ public class Tetrimino : MonoBehaviour {
 		SetPosCube ();
 
 		order.RemoveFirst ();
-		int rnd = Random.Range (I_TETRIMINO, T_TETRIMINO + 1);
-		order.AddLast (rnd);
 
+		int rnd;
+		for (int i = 0; i < 5; i++) {
+			rnd = Random.Range (I_TETRIMINO, T_TETRIMINO + 1);
+			if(order.Last.Value != rnd) {
+				order.AddLast (rnd);
+				break;
+			}
+		}
+		SetNextBlock ();
 		SetGost ();
 	}
 
@@ -404,6 +415,9 @@ public class Tetrimino : MonoBehaviour {
 							blockMass.there [fy, x] = blockMass.there [fy - 1, x];
 							blockMass.there [fy - 1, x] = false;
 							blockMass.blocks [fy, x] = blockMass.blocks [fy - 1, x];
+							blockMass.blocks [fy - 1, x].cube = null;
+							blockMass.blocks [fy - 1, x].cubePos = new Vector2(0, 0);
+							blockMass.blocks [fy - 1, x].placePos = new Vector2(0, 0);
 							if (!blockMass.there [fy, x]) {
 								continue;
 							}
@@ -413,7 +427,7 @@ public class Tetrimino : MonoBehaviour {
 							blockMass.blocks [fy, x].cube.transform.position = new Vector3 (px, py, 8);
 						}
 					}
-					blockMass.top--;
+					blockMass.top++;
 					num++;
 				}
 			}
@@ -447,5 +461,29 @@ public class Tetrimino : MonoBehaviour {
 		x = block.pos.x + block.cubes [3].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [3].cubePos.y - dy + 1;
 		gost4.transform.position = new Vector3 (x, y, 8);
+	}
+
+	// 次のブロック
+	void SetNextBlock() {
+		int[] ix = new int[4];
+		int[] iy = new int[4];
+		float x = 8;
+		float y = 5;
+		int index = 0;
+
+		for (int j = 0; j < HEIGHT; j++) {
+			for(int i = 0; i < WIDE; i++) {
+				if(form [order.First.Value, j, i]) {
+					ix[index] = i;
+					iy[index] = j;
+					index++;
+				}
+			}
+		}
+
+		nextBlock1.transform.position = new Vector3 (x + ix [0], y - iy [0], 8);
+		nextBlock2.transform.position = new Vector3 (x + ix [1], y - iy [1], 8);
+		nextBlock3.transform.position = new Vector3 (x + ix [2], y - iy [2], 8);
+		nextBlock4.transform.position = new Vector3 (x + ix [3], y - iy [3], 8);
 	}
 }
