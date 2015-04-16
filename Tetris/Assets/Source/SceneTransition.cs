@@ -13,6 +13,7 @@ public class SceneTransition : MonoBehaviour {
 	bool isFading = false;
 	public Color fadeColor = Color.black;
 	public Score score;
+	bool enter;
 
 	// Use this for initialization
 	void Start () {
@@ -28,7 +29,8 @@ public class SceneTransition : MonoBehaviour {
 			GUI.DrawTexture (new Rect (0, 0, Screen.width, Screen.height), Texture2D.whiteTexture);
 		}
 		if (scene != TransitionScene.RESULT) {
-			if (Input.GetKeyDown (KeyCode.Return)) {
+			if (Input.GetKeyDown (KeyCode.Return) && !enter) {
+				enter = true;
 				LoadLevel ();
 			}
 		}
