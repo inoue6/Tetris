@@ -71,7 +71,6 @@ public class Tetrimino : MonoBehaviour {
 		GeneratTetrimino ();
 
 		description = true;
-		
 	}
 	
 	// Update is called once per frame
@@ -114,6 +113,7 @@ public class Tetrimino : MonoBehaviour {
 		}
 		SetPosCube ();
 		SetGost ();
+
 	}
 
 	// 形状の初期化
@@ -224,6 +224,7 @@ public class Tetrimino : MonoBehaviour {
 		// オブジェクト配置
 		for (int i = 0; i < 4; i++) {
 			block.cubes[i].cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			block.cubes[i].cube.transform.localScale = new Vector3(0.97f,0.97f,1);
 			SetColor(block.cubes[i].cube);
 		}
 		SetPosCube ();
@@ -242,7 +243,7 @@ public class Tetrimino : MonoBehaviour {
 		SetGost ();
 	}
 
-	// キューブの色をブロックに合わせて変更
+	// キューブの色をブロックに合わせて設定
 	void SetColor(GameObject cube)
 	{
 		Resources.UnloadUnusedAssets ();
