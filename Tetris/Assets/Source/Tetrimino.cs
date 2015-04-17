@@ -71,6 +71,7 @@ public class Tetrimino : MonoBehaviour {
 		GeneratTetrimino ();
 
 		description = true;
+		
 	}
 	
 	// Update is called once per frame
@@ -223,6 +224,7 @@ public class Tetrimino : MonoBehaviour {
 		// オブジェクト配置
 		for (int i = 0; i < 4; i++) {
 			block.cubes[i].cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			SetColor(block.cubes[i].cube);
 		}
 		SetPosCube ();
 
@@ -238,6 +240,54 @@ public class Tetrimino : MonoBehaviour {
 		}
 		SetNextBlock ();
 		SetGost ();
+	}
+
+	// キューブの色をブロックに合わせて変更
+	void SetColor(GameObject cube)
+	{
+		Resources.UnloadUnusedAssets ();
+
+		Renderer renderer = cube.GetComponent<Renderer> ();
+		renderer.material = new Material (renderer.material);
+		switch(order.First.Value)
+		{
+			// 水色
+		case 0:
+			renderer.material.color = new Color (0.0f, 0.8f, 1.0f);
+			break;
+
+			// 黄
+		case 1:
+			renderer.material.color = new Color (0.8f, 0.8f, 0.0f);
+			break;
+
+			// 黄緑
+		case 2:
+			renderer.material.color = new Color (0.0f, 0.8f, 0.0f);
+			break;
+
+			// 赤
+		case 3:
+			renderer.material.color = new Color (0.8f, 0.0f, 0.0f);
+			break;
+
+			// 青
+		case 4:
+			renderer.material.color = new Color (0.0f, 0.0f, 0.8f);
+			break;
+
+			// オレンジ
+		case 5:
+			renderer.material.color = new Color (1.0f, 0.5f, 0.0f);
+			break;
+
+			// 紫
+		case 6:
+			renderer.material.color = new Color (0.5f, 0.0f, 0.5f);
+			break;
+		default:
+			break;
+		}
 	}
 
 	// キューブを配置する座標変換
@@ -461,6 +511,7 @@ public class Tetrimino : MonoBehaviour {
 		x = block.pos.x + block.cubes [3].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [3].cubePos.y - dy + 1;
 		gost4.transform.position = new Vector3 (x, y, 8);
+		
 	}
 
 	// 次のブロック
@@ -485,5 +536,11 @@ public class Tetrimino : MonoBehaviour {
 		nextBlock2.transform.position = new Vector3 (x + ix [1], y - iy [1], 8);
 		nextBlock3.transform.position = new Vector3 (x + ix [2], y - iy [2], 8);
 		nextBlock4.transform.position = new Vector3 (x + ix [3], y - iy [3], 8);
+
+		// 色の設定
+		SetColor(nextBlock1);
+		SetColor(nextBlock2);
+		SetColor(nextBlock3);
+		SetColor(nextBlock4);
 	}
 }
