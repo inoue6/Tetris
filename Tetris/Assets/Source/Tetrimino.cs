@@ -358,6 +358,61 @@ public class Tetrimino : MonoBehaviour {
 		return false;
 	}
 
+	// ブロックを壁際で回転をさせる
+	Block KickWall(Block b)
+	{
+		int x;
+		int y;
+		for (int i = 0; i < 4; i++) {
+			x = (int)(b.cubes[i].cubePos.x + blockMass.blockPos.x);
+			y = (int)(b.cubes[i].cubePos.y + blockMass.blockPos.y);
+			if(blockMass.there [y, x])
+			{
+				return block;
+			}
+			else if (x <= 2) 
+			{
+				for(int j=0;j<4;j++)
+				{
+					if(b.tetrimino != I_TETRIMINO)
+						b.cubes[j].cubePos.x+=1;
+					else if(y+2 <21 && b.form[2,0]==true)
+					{
+						b.cubes[j].cubePos.x+=2;
+					}
+					else if(y+2 <21 && b.form[2,0]==false)
+					{
+						b.cubes[j].cubePos.x+=1;
+					}
+					else
+						return block;
+				}
+				break;
+			}
+			else if(x == 11)
+			{
+				for(int j=0;j<4;j++)
+				{
+					if(b.tetrimino != I_TETRIMINO)
+						b.cubes[j].cubePos.x-=1;
+					else if(y+2 <21 && b.form[2,0]==false)
+					{
+						b.cubes[j].cubePos.x-=2;
+					}
+					else if(y+2 <21 && b.form[2,0]==true)
+					{
+						b.cubes[j].cubePos.x-=1;
+					}
+					else
+						return block;
+				}
+				break;
+			}
+		}
+
+		return b;
+	}
+
 	// ブロックを回転させる
 	void RotateBulock() {
 		if (Input.GetKeyDown (KeyCode.A)) {
@@ -385,6 +440,10 @@ public class Tetrimino : MonoBehaviour {
 
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
+				}
+				else
+				{
+					block = KickWall(after);
 				}
 			}
 		}
@@ -414,6 +473,10 @@ public class Tetrimino : MonoBehaviour {
 
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
+				}
+				else
+				{
+					block = KickWall(after);
 				}
 			}
 		}
@@ -461,6 +524,10 @@ public class Tetrimino : MonoBehaviour {
 						blockMass.blocks[y, x].cubePos = new Vector2(0, 0);
 						blockMass.blocks[y, x].placePos = new Vector2(0, 0);
 					}
+
+					// ブロック消去の演出(3秒間スリープさせる)
+					System.Threading.Thread.Sleep (180);
+
 					for (int fy = y; fy > blockMass.top; fy--) {
 						for(int x = 2; x < 12; x++) {
 							blockMass.there [fy, x] = blockMass.there [fy - 1, x];
