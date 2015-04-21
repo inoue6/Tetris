@@ -65,6 +65,10 @@ public class Tetrimino : MonoBehaviour {
 	float moveSpd;			// 左右キー押しっぱなし時の移動スピード
 	float moveSpdTime;
 
+	GameObject[,] blackCube = new GameObject[4,10];
+	int blackCubeCount;
+	public bool onBlackCube;
+	
 	// Use this for initialization
 	void Start () {
 		FormInit ();
@@ -77,6 +81,9 @@ public class Tetrimino : MonoBehaviour {
 
 		moveSpd = 0.1f;
 		moveSpdTime = 0;
+
+		blackCubeCount = 0;
+		onBlackCube = false;
 	}
 	
 	// Update is called once per frame
@@ -92,6 +99,11 @@ public class Tetrimino : MonoBehaviour {
 		}
 		BlockMove ();
 		RotateBulock ();
+
+		if (onBlackCube) {
+			DeleteBlackCube();
+			onBlackCube=false;
+		}
 
 		if (!generat && Input.GetKey (KeyCode.DownArrow)) {
 			block.spd = 0.01f;
@@ -118,9 +130,9 @@ public class Tetrimino : MonoBehaviour {
 			}
 			blockCount = 0;
 		}
+
 		SetPosCube ();
 		SetGost ();
-
 	}
 
 	// 形状の初期化
@@ -224,8 +236,11 @@ public class Tetrimino : MonoBehaviour {
 		blockMass.blockPos.y = 0;
 
 		if (CollisionBlocks (block, 0, 0)) {
-			gameOver = true;
-			return;
+			if(gameOver)
+				return;
+
+			FallLastBlocks();
+			goto end;
 		}
 
 		// オブジェクト配置
@@ -234,6 +249,7 @@ public class Tetrimino : MonoBehaviour {
 			block.cubes[i].cube.transform.localScale = new Vector3(0.97f,0.97f,1);
 			SetColor(block.cubes[i].cube);
 		}
+
 		SetPosCube ();
 
 		order.RemoveFirst ();
@@ -248,6 +264,7 @@ public class Tetrimino : MonoBehaviour {
 		}
 		SetNextBlock ();
 		SetGost ();
+	end:;
 	}
 
 	// キューブの色をブロックに合わせて設定
@@ -370,6 +387,40 @@ public class Tetrimino : MonoBehaviour {
 		return false;
 	}
 
+	// 出口から1列分の隙間があるときの処理
+	void FallLastBlocks()
+	{
+		for(int i=0;i<4;i++)
+		{
+			if(blockMass.there[0,3+i])
+			{
+				gameOver = true;
+				break;
+			}
+			if(i==3)
+			{
+				for(int j=0;j<4;j++)
+				{
+					if(block.cubes[j].cubePos.y == 3 && gameOver!=true)
+					{
+
+						block.cubes[j].cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+						block.cubes[j].cube.transform.localScale = new Vector3(0.97f,0.97f,1);
+						SetColor(block.cubes[j].cube);
+
+						float x = block.pos.x + block.cubes [j].cubePos.x;
+						float y = block.pos.y + 3.5f - block.cubes [j].cubePos.y;
+						block.cubes [j].placePos.x = x;
+						block.cubes [j].placePos.y = y;
+						block.cubes [j].cube.transform.position = new Vector3 (x, y+1, 8);
+					}
+				}
+			}
+		}
+
+		gameOver = true;
+	}
+
 	// ブロックを壁際で回転をさせる
 	Block KickWall(Block b)
 	{
@@ -378,7 +429,7 @@ public class Tetrimino : MonoBehaviour {
 		for (int i = 0; i < 4; i++) {
 			x = (int)(b.cubes[i].cubePos.x + blockMass.blockPos.x);
 			y = (int)(b.cubes[i].cubePos.y + blockMass.blockPos.y);
-			if(blockMass.there [y, x])
+			if(blockMass.there [y, x]||y < 1 || y > 21)
 			{
 				return block;
 			}
@@ -387,7 +438,9 @@ public class Tetrimino : MonoBehaviour {
 				for(int j=0;j<4;j++)
 				{
 					if(b.tetrimino != I_TETRIMINO)
+					{
 						b.cubes[j].cubePos.x+=1;
+					}
 					else if(y+2 <21 && b.form[2,0]==true)
 					{
 						b.cubes[j].cubePos.x+=2;
@@ -519,6 +572,40 @@ public class Tetrimino : MonoBehaviour {
 		}
 	}
 
+	// 消える時の演出のブロック生成
+	void CreateBlackCube(float y)
+	{
+		for(int i=0;i<10;i++)
+		{
+			blackCube[blackCubeCount,i] = GameObject.CreatePrimitive(PrimitiveType.Cube);
+			blackCube[blackCubeCount,i].transform.localScale = new Vector3(0.98f,0.98f,1.0f);
+			blackCube[blackCubeCount,i].transform.position = new Vector3 (-5+(1*i), y, 7.9f);
+			Renderer renderer = blackCube[blackCubeCount,i].GetComponent<Renderer> ();
+			renderer.material = new Material (renderer.material);
+			renderer.material.color = new Color (0.0f, 0.0f, 0.0f);
+		}
+		blackCubeCount += 1;
+
+		onBlackCube = true;
+	}
+
+	// 消える時の演出のブロック消去
+	void DeleteBlackCube()
+	{
+		if (blackCubeCount != 0) 
+		{
+			for (int i=0; i<=blackCubeCount; i++) 
+			{
+				for (int j=0; j<10; j++) 
+				{
+					Destroy (blackCube [blackCubeCount - i, j]);
+				}
+			}
+		}
+		blackCubeCount=0;
+		Resources.UnloadUnusedAssets ();
+	}
+
 	// ブロック消去
 	void RemoveBlock() {
 		int num = 0;
@@ -529,6 +616,8 @@ public class Tetrimino : MonoBehaviour {
 					break;
 				}
 				if (j == 11) {
+					CreateBlackCube(block.cubes[i].placePos.y);
+
 					for (int x = 2; x < 12; x++) {
 						Destroy (blockMass.blocks [y, x].cube);
 						blockMass.there [y, x] = false;
@@ -536,9 +625,6 @@ public class Tetrimino : MonoBehaviour {
 						blockMass.blocks[y, x].cubePos = new Vector2(0, 0);
 						blockMass.blocks[y, x].placePos = new Vector2(0, 0);
 					}
-
-					// ブロック消去の演出(3秒間スリープさせる)
-					System.Threading.Thread.Sleep (180);
 
 					for (int fy = y; fy > blockMass.top; fy--) {
 						for(int x = 2; x < 12; x++) {
