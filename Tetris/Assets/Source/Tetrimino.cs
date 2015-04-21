@@ -62,6 +62,9 @@ public class Tetrimino : MonoBehaviour {
 	float spdTime;
 	public bool gameOver;
 
+	float moveSpd;			// 左右キー押しっぱなし時の移動スピード
+	float moveSpdTime;
+
 	// Use this for initialization
 	void Start () {
 		FormInit ();
@@ -71,6 +74,9 @@ public class Tetrimino : MonoBehaviour {
 		GeneratTetrimino ();
 
 		description = true;
+
+		moveSpd = 0.1f;
+		moveSpdTime = 0;
 	}
 	
 	// Update is called once per frame
@@ -80,6 +86,7 @@ public class Tetrimino : MonoBehaviour {
 				description = false;
 				texture.transform.position = new Vector3(100, 0, 0);
 				spdTime = Time.time;
+				moveSpdTime = Time.time;
 			}
 			return;
 		}
@@ -322,18 +329,23 @@ public class Tetrimino : MonoBehaviour {
 
 	// ブロックの移動
 	void BlockMove() {
-		if (Input.GetKeyDown (KeyCode.RightArrow)) {
+		if(	Input.GetKey(KeyCode.RightArrow) &&
+			((Time.time - moveSpdTime) >= moveSpd))
+		{
 			if (!CollisionBlocks (block, 1, 0)) {
 				block.pos.x += 1.0f;
 				blockMass.blockPos.x += 1;
 			}
+			moveSpdTime = Time.time;
 		}
-
-		if (Input.GetKeyDown (KeyCode.LeftArrow)) {
+		if(	Input.GetKey(KeyCode.LeftArrow) &&
+		   ((Time.time - moveSpdTime) >= moveSpd))
+		{
 			if (!CollisionBlocks (block, -1, 0)) {
 				block.pos.x -= 1.0f;
 				blockMass.blockPos.x -= 1;
 			}
+			moveSpdTime = Time.time;
 		}
 	}
 
