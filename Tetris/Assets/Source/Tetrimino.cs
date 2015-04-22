@@ -65,9 +65,7 @@ public class Tetrimino : MonoBehaviour {
 	float moveSpd;			// 左右キー押しっぱなし時の移動スピード
 	float moveSpdTime;
 
-	GameObject[,] blackCube = new GameObject[4,10];
-	int blackCubeCount;
-	public bool onBlackCube;
+	bool blackCube;			// 一列そろった時の黒テトリミノの有無
 
 	// Use this for initialization
 	void Start () {
@@ -82,8 +80,7 @@ public class Tetrimino : MonoBehaviour {
 		moveSpd = 0.1f;
 		moveSpdTime = 0;
 
-		blackCubeCount = 0;
-		onBlackCube = false;
+		blackCube = false;
 	}
 	
 	// Update is called once per frame
@@ -96,11 +93,6 @@ public class Tetrimino : MonoBehaviour {
 				moveSpdTime = Time.time;
 			}
 			return;
-		}
-
-		if (onBlackCube) {
-			DeleteBlackCube();
-			onBlackCube=false;
 		}
 
 		if (!generat && Input.GetKey (KeyCode.DownArrow)) {
@@ -133,7 +125,8 @@ public class Tetrimino : MonoBehaviour {
 		}
 
 		SetPosCube ();
-		SetGost ();
+		if(!blackCube)
+			SetGost ();
 	}
 
 	// 形状の初期化
@@ -299,7 +292,7 @@ public class Tetrimino : MonoBehaviour {
 
 			// 青
 		case 4:
-			renderer.material.color = new Color (0.0f, 0.0f, 0.8f);
+			renderer.material.color = new Color (0.0f, 0.2f, 0.8f);
 			break;
 
 			// オレンジ
@@ -344,7 +337,7 @@ public class Tetrimino : MonoBehaviour {
 
 			// 青
 		case J_TETRIMINO:
-			renderer.material.color = new Color (0.0f, 0.0f, 0.8f, 0.5f);
+			renderer.material.color = new Color (0.0f, 0.2f, 0.8f, 0.5f);
 			break;
 
 			// オレンジ
@@ -536,7 +529,9 @@ public class Tetrimino : MonoBehaviour {
 	
 	// ブロックを回転させる
 	void RotateBulock() {
-		if (Input.GetKeyDown (KeyCode.A)) {
+		if (Input.GetKeyDown (KeyCode.A) && 
+		    ((block.tetrimino == I_TETRIMINO && block.pos.y < 7) ||
+		 	(block.tetrimino != I_TETRIMINO && block.pos.y < 8))) {
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
 				after.cubes = new Cube[4];
@@ -569,7 +564,9 @@ public class Tetrimino : MonoBehaviour {
 			}
 		}
 
-		if (Input.GetKeyDown (KeyCode.S)) {
+		if (Input.GetKeyDown (KeyCode.S) && 
+		    ((block.tetrimino == I_TETRIMINO && block.pos.y < 7) ||
+		    (block.tetrimino != I_TETRIMINO && block.pos.y < 8))) {
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
 				after.cubes = new Cube[4];
@@ -623,47 +620,51 @@ public class Tetrimino : MonoBehaviour {
 				}
 				blockMass.blocks [y, x] = block.cubes [i];
 			}
-			RemoveBlock ();
-			GeneratTetrimino ();
+			if(blackCube)
+				RemoveBlock ();
+
+			ChangeColorRemoveBlock();
+
+			if(!blackCube)
+				GeneratTetrimino ();
 		}
 	}
 
-	// 消える時の演出のブロック生成
-	void CreateBlackCube(float y)
-	{
-		for(int i=0;i<10;i++)
-		{
-			blackCube[blackCubeCount,i] = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			blackCube[blackCubeCount,i].transform.localScale = new Vector3(0.98f,0.98f,1.0f);
-			blackCube[blackCubeCount,i].transform.position = new Vector3 (-5+(1*i), y, 7.9f);
-			Renderer renderer = blackCube[blackCubeCount,i].GetComponent<Renderer> ();
-			renderer.material = new Material (renderer.material);
-			renderer.material.color = new Color (0.0f, 0.0f, 0.0f);
-		}
-		blackCubeCount += 1;
 
-		onBlackCube = true;
-	}
-
-	// 消える時の演出のブロック消去
-	void DeleteBlackCube()
+	// 消えるブロックを黒くする
+	void ChangeColorRemoveBlock()
 	{
-		if (blackCubeCount != 0) 
-		{
-			for (int i=0; i<=blackCubeCount; i++) 
-			{
-				for (int j=0; j<10; j++) 
-				{
-					Destroy (blackCube [blackCubeCount - i, j]);
+		for (int i = 0; i < 4; i++) {
+			int y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
+			for (int j = 2; j < 12; j++) {
+				if (!blockMass.there [y, j]) {
+					break;
+				}
+				if (j == 11) {
+					Renderer renderer;
+					for (int x = 2; x < 12; x++) {
+						renderer = blockMass.blocks[y, x].cube.GetComponent<Renderer> ();
+						renderer.material.color = new Color (0.0f, 0.0f, 0.0f);
+					}
+					blackCube =true;
+
+					// ゴーストを透明にする
+					renderer = gost1.GetComponent<Renderer> ();
+					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
+					renderer = gost2.GetComponent<Renderer> ();
+					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
+					renderer = gost3.GetComponent<Renderer> ();
+					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
+					renderer = gost4.GetComponent<Renderer> ();
+					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
 				}
 			}
 		}
-		blackCubeCount=0;
-		Resources.UnloadUnusedAssets ();
 	}
 
 	// ブロック消去
 	void RemoveBlock() {
+		System.Threading.Thread.Sleep (500);
 		int num = 0;
 		for (int i = 0; i < 4; i++) {
 			int y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
@@ -672,8 +673,6 @@ public class Tetrimino : MonoBehaviour {
 					break;
 				}
 				if (j == 11) {
-					CreateBlackCube(block.cubes[i].placePos.y);
-
 					for (int x = 2; x < 12; x++) {
 						Destroy (blockMass.blocks [y, x].cube);
 						blockMass.there [y, x] = false;
@@ -707,6 +706,8 @@ public class Tetrimino : MonoBehaviour {
 		if (num > 0) {
 			score.AddScore (block.spd, num);
 		}
+
+		blackCube = false;
 	}
 
 	// ゴースト生成
