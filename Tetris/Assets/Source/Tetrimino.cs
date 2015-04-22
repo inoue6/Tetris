@@ -68,7 +68,7 @@ public class Tetrimino : MonoBehaviour {
 	GameObject[,] blackCube = new GameObject[4,10];
 	int blackCubeCount;
 	public bool onBlackCube;
-	
+
 	// Use this for initialization
 	void Start () {
 		FormInit ();
@@ -97,8 +97,6 @@ public class Tetrimino : MonoBehaviour {
 			}
 			return;
 		}
-		BlockMove ();
-		RotateBulock ();
 
 		if (onBlackCube) {
 			DeleteBlackCube();
@@ -113,6 +111,9 @@ public class Tetrimino : MonoBehaviour {
 			FallTetrimino ();
 			spdTime = Time.time;
 		}
+
+		BlockMove ();
+		RotateBulock ();
 
 		if (gameOver) {
 			text.transform.position = new Vector3(0.12f, 0.7f, 0);
@@ -315,6 +316,51 @@ public class Tetrimino : MonoBehaviour {
 		}
 	}
 
+	// ゴーストの色を半透過して設定
+	void SetGhostColor(GameObject ghostCube)
+	{
+		Renderer renderer = ghostCube.GetComponent<Renderer> ();
+		switch(block.tetrimino)
+		{
+			// 水色
+		case I_TETRIMINO:
+			renderer.material.color = new Color (0.0f, 0.8f, 1.0f, 0.5f);
+			break;
+
+			// 黄
+		case O_TETRIMINO:
+			renderer.material.color = new Color (0.8f, 0.8f, 0.0f, 0.5f);
+			break;
+
+			// 黄緑
+		case S_TETRIMINO:
+			renderer.material.color = new Color (0.0f, 0.8f, 0.0f, 0.5f);
+			break;
+
+			// 赤
+		case Z_TETRIMINO:
+			renderer.material.color = new Color (0.8f, 0.0f, 0.0f, 0.5f);
+			break;
+
+			// 青
+		case J_TETRIMINO:
+			renderer.material.color = new Color (0.0f, 0.0f, 0.8f, 0.5f);
+			break;
+
+			// オレンジ
+		case L_TETRIMINO:
+			renderer.material.color = new Color (1.0f, 0.5f, 0.0f, 0.5f);
+			break;
+
+			// 紫
+		case T_TETRIMINO:
+			renderer.material.color = new Color (0.5f, 0.0f, 0.5f, 0.5f);
+			break;
+		default:
+			break;
+		}	
+	}
+
 	// キューブを配置する座標変換
 	Block CubePosDecision(Block b) {
 		b.cubes = new Cube[4];
@@ -421,19 +467,33 @@ public class Tetrimino : MonoBehaviour {
 		gameOver = true;
 	}
 
-	// ブロックを壁際で回転をさせる
-	Block KickWall(Block b)
+	// ブロックの壁際での当たり判定
+	bool CollisionKickWallBlocks(Block cBlock, int mx, int my)
 	{
 		int x;
 		int y;
 		for (int i = 0; i < 4; i++) {
-			x = (int)(b.cubes[i].cubePos.x + blockMass.blockPos.x);
-			y = (int)(b.cubes[i].cubePos.y + blockMass.blockPos.y);
-			if(blockMass.there [y, x]||y < 1 || y > 21)
-			{
-				return block;
+			x = (int)(cBlock.cubes[i].cubePos.x + blockMass.blockPos.x + mx);
+			y = (int)(cBlock.cubes[i].cubePos.y + blockMass.blockPos.y + my);
+			if (y < 1 || y > 21) {
+				return true;
 			}
-			else if (x <= 2) 
+			if (blockMass.there [y, x]) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	// ブロックを壁際で回転をさせる
+	Block KickWall(Block b)
+	{
+		int x;
+		for (int i = 0; i < 4; i++) {
+			x = (int)(b.cubes[i].cubePos.x + blockMass.blockPos.x);
+
+			if (x <= 2) 
 			{
 				for(int j=0;j<4;j++)
 				{
@@ -441,16 +501,14 @@ public class Tetrimino : MonoBehaviour {
 					{
 						b.cubes[j].cubePos.x+=1;
 					}
-					else if(y+2 <21 && b.form[2,0]==true)
+					else if(b.form[2,0]==true)
 					{
 						b.cubes[j].cubePos.x+=2;
 					}
-					else if(y+2 <21 && b.form[2,0]==false)
+					else if(b.form[2,0]==false)
 					{
 						b.cubes[j].cubePos.x+=1;
 					}
-					else
-						return block;
 				}
 				break;
 			}
@@ -460,24 +518,22 @@ public class Tetrimino : MonoBehaviour {
 				{
 					if(b.tetrimino != I_TETRIMINO)
 						b.cubes[j].cubePos.x-=1;
-					else if(y+2 <21 && b.form[2,0]==false)
+					else if(b.form[2,0]==false)
 					{
 						b.cubes[j].cubePos.x-=2;
 					}
-					else if(y+2 <21 && b.form[2,0]==true)
+					else if(b.form[2,0]==true)
 					{
 						b.cubes[j].cubePos.x-=1;
 					}
-					else
-						return block;
 				}
 				break;
 			}
 		}
-
+		
 		return b;
 	}
-
+	
 	// ブロックを回転させる
 	void RotateBulock() {
 		if (Input.GetKeyDown (KeyCode.A)) {
@@ -506,7 +562,7 @@ public class Tetrimino : MonoBehaviour {
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				else
+				else if(!CollisionKickWallBlocks(after, 0, 0))
 				{
 					block = KickWall(after);
 				}
@@ -539,7 +595,7 @@ public class Tetrimino : MonoBehaviour {
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				else
+				else if(!CollisionKickWallBlocks(after, 0, 0))
 				{
 					block = KickWall(after);
 				}
@@ -665,19 +721,22 @@ public class Tetrimino : MonoBehaviour {
 		float x = block.pos.x + block.cubes [0].cubePos.x;
 		float y = block.pos.y + 3.5f - block.cubes [0].cubePos.y - dy + 1;
 		gost1.transform.position = new Vector3 (x, y, 8);
+		SetGhostColor (gost1);
 
 		x = block.pos.x + block.cubes [1].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [1].cubePos.y - dy + 1;
 		gost2.transform.position = new Vector3 (x, y, 8);
+		SetGhostColor (gost2);
 
 		x = block.pos.x + block.cubes [2].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [2].cubePos.y - dy + 1;
 		gost3.transform.position = new Vector3 (x, y, 8);
+		SetGhostColor (gost3);
 
 		x = block.pos.x + block.cubes [3].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [3].cubePos.y - dy + 1;
 		gost4.transform.position = new Vector3 (x, y, 8);
-		
+		SetGhostColor (gost4);
 	}
 
 	// 次のブロック
