@@ -526,12 +526,10 @@ public class Tetrimino : MonoBehaviour {
 		
 		return b;
 	}
-	
+
 	// ブロックを回転させる
 	void RotateBulock() {
-		if (Input.GetKeyDown (KeyCode.A) && 
-		    ((block.tetrimino == I_TETRIMINO && block.pos.y < 7) ||
-		 	(block.tetrimino != I_TETRIMINO && block.pos.y < 8))) {
+		if (Input.GetKeyDown (KeyCode.A)) {
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
 				after.cubes = new Cube[4];
@@ -554,6 +552,21 @@ public class Tetrimino : MonoBehaviour {
 					after.cubes [i].cube = block.cubes [i].cube;
 				}
 
+				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
+				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				{
+					for (int i = 0; i < 4; i++) {
+						after.cubes [i].cubePos.y += 2;
+					}
+				}
+				else if(((block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 1) ||
+				         (block.tetrimino != I_TETRIMINO && blockMass.blockPos.y == 0)))
+				{
+					for (int i = 0; i < 4; i++) {
+						after.cubes [i].cubePos.y += 1;
+					}
+				}
+		
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
@@ -564,9 +577,7 @@ public class Tetrimino : MonoBehaviour {
 			}
 		}
 
-		if (Input.GetKeyDown (KeyCode.S) && 
-		    ((block.tetrimino == I_TETRIMINO && block.pos.y < 7) ||
-		    (block.tetrimino != I_TETRIMINO && block.pos.y < 8))) {
+		if (Input.GetKeyDown (KeyCode.S)){
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
 				after.cubes = new Cube[4];
@@ -587,6 +598,21 @@ public class Tetrimino : MonoBehaviour {
 
 				for (int i = 0; i < 4; i++) {
 					after.cubes [i].cube = block.cubes [i].cube;
+				}
+
+				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
+				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				{
+					for (int i = 0; i < 4; i++) {
+						after.cubes [i].cubePos.y += 2;
+					}
+				}
+				else if(((block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 1) ||
+				         (block.tetrimino != I_TETRIMINO && blockMass.blockPos.y == 0)))
+				{
+					for (int i = 0; i < 4; i++) {
+						after.cubes [i].cubePos.y += 1;
+					}
 				}
 
 				if (!CollisionBlocks (after, 0, 0)) {
