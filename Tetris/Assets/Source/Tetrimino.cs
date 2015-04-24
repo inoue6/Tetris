@@ -74,6 +74,8 @@ public class Tetrimino : MonoBehaviour {
 	float moveSpd;			// 左右キー押しっぱなし時の移動スピード
 	float moveSpdTime;
 
+	float playTime;
+
 	bool blackCube;			// 一列そろった時の黒テトリミノの有無
 
 	// Use this for initialization
@@ -86,8 +88,10 @@ public class Tetrimino : MonoBehaviour {
 
 		description = true;
 
-		moveSpd = 0.1f;
+		moveSpd = 0.12f;
 		moveSpdTime = 0;
+
+		playTime = 0.0f;
 
 		blackCube = false;
 	}
@@ -104,6 +108,10 @@ public class Tetrimino : MonoBehaviour {
 			return;
 		}
 
+		if (CollisionBlocks (block, 0, 1)) {
+			playTime += Time.deltaTime;
+		}
+
 		if (!generat && Input.GetKey (KeyCode.DownArrow)) {
 			block.spd = 0.01f;
 		}
@@ -114,8 +122,32 @@ public class Tetrimino : MonoBehaviour {
 		}
 
 		BlockMove ();
-		LeftRotateBulock ();
-		RightRotateBulock ();
+
+		LeftRotateBlock ();
+		RightRotateBlock ();
+
+		if (playTime > 0.0f) {
+			playTime += Time.deltaTime;
+			if(playTime >= 0.5) {
+				playTime = 0.0f;
+
+				int x;
+				int y;
+				for (int i = 0; i < 4; i++) {
+					x = (int)(block.cubes[i].cubePos.x + blockMass.blockPos.x);
+					y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
+					blockMass.there [y, x] = true;
+					if (blockMass.top > y) {
+						blockMass.top = y;
+					}
+					blockMass.blocks [y, x] = block.cubes [i];
+				}
+
+				SetPosCube ();
+
+				GeneratTetrimino ();
+			}
+		}
 
 		if (gameOver) {
 			text.transform.position = new Vector3(0.12f, 0.7f, 0);
@@ -135,6 +167,7 @@ public class Tetrimino : MonoBehaviour {
 		}
 
 		SetPosCube ();
+
 		if(!blackCube)
 			SetGhost ();
 	}
@@ -338,6 +371,9 @@ public class Tetrimino : MonoBehaviour {
 
 	// キューブ配置
 	void SetPosCube() {
+		if (gameOver) {
+			return;
+		}
 		for (int i = 0; i < 4; i++) {
 			float x = block.pos.x + block.cubes [i].cubePos.x;
 			float y = block.pos.y + 3.5f - block.cubes [i].cubePos.y;
@@ -493,7 +529,7 @@ public class Tetrimino : MonoBehaviour {
 	}
 
 	// ブロックを左回転させる
-	void LeftRotateBulock() {
+	void LeftRotateBlock() {
 		if (Input.GetKeyDown (KeyCode.A)) {
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
@@ -539,12 +575,18 @@ public class Tetrimino : MonoBehaviour {
 				{
 					block = KickWall(after);
 				}
+
+				if(playTime > 0.0f) {
+					if(!CollisionBlocks (block, 0, 1)) {
+						playTime = 0.0f;
+					}
+				}
 			}
 		}
 	}
 
 	// ブロックを右回転させる
-	void RightRotateBulock() {
+	void RightRotateBlock() {
 		if (Input.GetKeyDown (KeyCode.S)){
 			if (block.tetrimino != O_TETRIMINO) {
 				Block after = new Block ();
@@ -590,6 +632,12 @@ public class Tetrimino : MonoBehaviour {
 				{
 					block = KickWall(after);
 				}
+
+				if(playTime > 0.0f) {
+					if(!CollisionBlocks (block, 0, 1)) {
+						playTime = 0.0f;
+					}
+				}
 			}
 		}
 	}
@@ -602,25 +650,6 @@ public class Tetrimino : MonoBehaviour {
 			if(generat) {
 				generat = false;
 			}
-		} else {
-			int x;
-			int y;
-			for (int i = 0; i < 4; i++) {
-				x = (int)(block.cubes[i].cubePos.x + blockMass.blockPos.x);
-				y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
-				blockMass.there [y, x] = true;
-				if (blockMass.top > y) {
-					blockMass.top = y;
-				}
-				blockMass.blocks [y, x] = block.cubes [i];
-			}
-			if(blackCube)
-				RemoveBlock ();
-
-			ChangeColorRemoveBlock();
-
-			if(!blackCube)
-				GeneratTetrimino ();
 		}
 	}
 
