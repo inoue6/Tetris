@@ -142,6 +142,7 @@ public class Tetrimino : MonoBehaviour {
 					}
 					blockMass.blocks [y, x] = block.cubes [i];
 				}
+				RemoveBlock ();
 
 				SetPosCube ();
 
@@ -167,6 +168,7 @@ public class Tetrimino : MonoBehaviour {
 		}
 
 		SetPosCube ();
+		BlockMassSetPosition ();
 
 		if(!blackCube)
 			SetGhost ();
@@ -687,7 +689,6 @@ public class Tetrimino : MonoBehaviour {
 
 	// ブロック消去
 	void RemoveBlock() {
-		System.Threading.Thread.Sleep (400);
 		int num = 0;
 		for (int i = 0; i < 4; i++) {
 			int y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
@@ -795,5 +796,17 @@ public class Tetrimino : MonoBehaviour {
 		SetColor(nextBlock2);
 		SetColor(nextBlock3);
 		SetColor(nextBlock4);
+	}
+
+	void BlockMassSetPosition () {
+		for (int j = 2; j < 22; j++) {
+			for(int i = 2; i < 12; i++) {
+				if(blockMass.there[j, i]) {
+					float x = blockMass.blocks[j, i].placePos.x;
+					float y = blockMass.blocks[j, i].placePos.y;
+					blockMass.blocks[j, i].cube.transform.position = new Vector3 (x, y, 8);
+				}
+			}
+		}
 	}
 }
