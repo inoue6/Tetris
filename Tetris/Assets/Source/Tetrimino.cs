@@ -47,12 +47,21 @@ public class Tetrimino : MonoBehaviour {
 
 	LinkedList<int> order = new LinkedList<int> ();		// ブロックが出てくる順番
 
+	public Material redMaterial;
+	public Material blueMaterial;
+	public Material lightBlueMaterial;
+	public Material yelloMaterial;
+	public Material yelloGreenMaterial;
+	public Material purpleMaterial;
+	public Material orangeMaterial;
+	public Material ghostMaterial;
+
 	Block block;			// 落下してくるブロック
 	Blockmass blockMass;	// ブロックの塊
-	public GameObject gost1;
-	public GameObject gost2;
-	public GameObject gost3;
-	public GameObject gost4;
+	public GameObject ghost1;
+	public GameObject ghost2;
+	public GameObject ghost3;
+	public GameObject ghost4;
 	public GameObject nextBlock1;
 	public GameObject nextBlock2;
 	public GameObject nextBlock3;
@@ -127,7 +136,7 @@ public class Tetrimino : MonoBehaviour {
 
 		SetPosCube ();
 		if(!blackCube)
-			SetGost ();
+			SetGhost ();
 	}
 
 	// 形状の初期化
@@ -258,7 +267,7 @@ public class Tetrimino : MonoBehaviour {
 			}
 		}
 		SetNextBlock ();
-		SetGost ();
+		SetGhost ();
 	end:;
 	}
 
@@ -273,86 +282,41 @@ public class Tetrimino : MonoBehaviour {
 		{
 			// 水色
 		case 0:
-			renderer.material.color = new Color (0.0f, 0.8f, 1.0f);
+			renderer.material = lightBlueMaterial;
 			break;
 
 			// 黄
 		case 1:
-			renderer.material.color = new Color (0.8f, 0.8f, 0.0f);
+			renderer.material = yelloMaterial;
 			break;
 
 			// 黄緑
 		case 2:
-			renderer.material.color = new Color (0.0f, 0.8f, 0.0f);
+			renderer.material = yelloGreenMaterial;
 			break;
 
 			// 赤
 		case 3:
-			renderer.material.color = new Color (0.8f, 0.0f, 0.0f);
+			renderer.material = redMaterial;
 			break;
 
 			// 青
 		case 4:
-			renderer.material.color = new Color (0.0f, 0.2f, 0.8f);
+			renderer.material = blueMaterial;
 			break;
 
 			// オレンジ
 		case 5:
-			renderer.material.color = new Color (1.0f, 0.5f, 0.0f);
+			renderer.material = orangeMaterial;
 			break;
 
 			// 紫
 		case 6:
-			renderer.material.color = new Color (0.5f, 0.0f, 0.5f);
+			renderer.material = purpleMaterial;
 			break;
 		default:
 			break;
 		}
-	}
-
-	// ゴーストの色を半透過して設定
-	void SetGhostColor(GameObject ghostCube)
-	{
-		Renderer renderer = ghostCube.GetComponent<Renderer> ();
-		switch(block.tetrimino)
-		{
-			// 水色
-		case I_TETRIMINO:
-			renderer.material.color = new Color (0.0f, 0.8f, 1.0f, 0.5f);
-			break;
-
-			// 黄
-		case O_TETRIMINO:
-			renderer.material.color = new Color (0.8f, 0.8f, 0.0f, 0.5f);
-			break;
-
-			// 黄緑
-		case S_TETRIMINO:
-			renderer.material.color = new Color (0.0f, 0.8f, 0.0f, 0.5f);
-			break;
-
-			// 赤
-		case Z_TETRIMINO:
-			renderer.material.color = new Color (0.8f, 0.0f, 0.0f, 0.5f);
-			break;
-
-			// 青
-		case J_TETRIMINO:
-			renderer.material.color = new Color (0.0f, 0.2f, 0.8f, 0.5f);
-			break;
-
-			// オレンジ
-		case L_TETRIMINO:
-			renderer.material.color = new Color (1.0f, 0.5f, 0.0f, 0.5f);
-			break;
-
-			// 紫
-		case T_TETRIMINO:
-			renderer.material.color = new Color (0.5f, 0.0f, 0.5f, 0.5f);
-			break;
-		default:
-			break;
-		}	
 	}
 
 	// キューブを配置する座標変換
@@ -679,13 +643,13 @@ public class Tetrimino : MonoBehaviour {
 					blackCube =true;
 
 					// ゴーストを透明にする
-					renderer = gost1.GetComponent<Renderer> ();
+					renderer = ghost1.GetComponent<Renderer> ();
 					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
-					renderer = gost2.GetComponent<Renderer> ();
+					renderer = ghost2.GetComponent<Renderer> ();
 					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
-					renderer = gost3.GetComponent<Renderer> ();
+					renderer = ghost3.GetComponent<Renderer> ();
 					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
-					renderer = gost4.GetComponent<Renderer> ();
+					renderer = ghost4.GetComponent<Renderer> ();
 					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
 				}
 			}
@@ -741,7 +705,7 @@ public class Tetrimino : MonoBehaviour {
 	}
 
 	// ゴースト生成
-	void SetGost() {
+	void SetGhost() {
 		int dy;
 		for (dy = 0; dy < 22; dy++) {
 			if (CollisionBlocks (block, 0, dy)) {
@@ -751,23 +715,27 @@ public class Tetrimino : MonoBehaviour {
 
 		float x = block.pos.x + block.cubes [0].cubePos.x;
 		float y = block.pos.y + 3.5f - block.cubes [0].cubePos.y - dy + 1;
-		gost1.transform.position = new Vector3 (x, y, 8);
-		SetGhostColor (gost1);
+		ghost1.transform.position = new Vector3 (x, y, 8);
+		Renderer renderer1 = ghost1.GetComponent<Renderer> ();
+		renderer1.material = ghostMaterial;
 
 		x = block.pos.x + block.cubes [1].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [1].cubePos.y - dy + 1;
-		gost2.transform.position = new Vector3 (x, y, 8);
-		SetGhostColor (gost2);
+		ghost2.transform.position = new Vector3 (x, y, 8);
+		Renderer renderer2 = ghost2.GetComponent<Renderer> ();
+		renderer2.material = ghostMaterial;
 
 		x = block.pos.x + block.cubes [2].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [2].cubePos.y - dy + 1;
-		gost3.transform.position = new Vector3 (x, y, 8);
-		SetGhostColor (gost3);
+		ghost3.transform.position = new Vector3 (x, y, 8);
+		Renderer renderer3 = ghost3.GetComponent<Renderer> ();
+		renderer3.material = ghostMaterial;
 
 		x = block.pos.x + block.cubes [3].cubePos.x;
 		y = block.pos.y + 3.5f - block.cubes [3].cubePos.y - dy + 1;
-		gost4.transform.position = new Vector3 (x, y, 8);
-		SetGhostColor (gost4);
+		ghost4.transform.position = new Vector3 (x, y, 8);
+		Renderer renderer4 = ghost4.GetComponent<Renderer> ();
+		renderer4.material = ghostMaterial;
 	}
 
 	// 次のブロック
