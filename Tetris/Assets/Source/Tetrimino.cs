@@ -110,6 +110,8 @@ public class Tetrimino : MonoBehaviour {
 
 		if (CollisionBlocks (block, 0, 1)) {
 			playTime += Time.deltaTime;
+		} else {
+			playTime = 0.0f;
 		}
 
 		if (!generat && Input.GetKey (KeyCode.DownArrow)) {
@@ -464,70 +466,38 @@ public class Tetrimino : MonoBehaviour {
 	}
 
 	// ブロックの壁際での当たり判定
-	bool CollisionKickWallBlocks(Block cBlock, int mx, int my)
+	int CollisionKickWallBlocks(Block cBlock)
 	{
 		int x;
 		int y;
+		int moveX = 0;
 		for (int i = 0; i < 4; i++) {
-			x = (int)(cBlock.cubes[i].cubePos.x + blockMass.blockPos.x + mx);
-			y = (int)(cBlock.cubes[i].cubePos.y + blockMass.blockPos.y + my);
-			if (y < 1 || y > 21) {
-				return true;
+			x = (int)(cBlock.cubes[i].cubePos.x + blockMass.blockPos.x);
+			y = (int)(cBlock.cubes[i].cubePos.y + blockMass.blockPos.y);
+			if(x < 2) {
+				return 2-x;
+			}
+			if(x > 21) {
+				return 21-x;
 			}
 			if (blockMass.there [y, x]) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-
-	// ブロックを壁際で回転をさせる
-	Block KickWall(Block b)
-	{
-		int x;
-		for (int i = 0; i < 4; i++) {
-			x = (int)(b.cubes[i].cubePos.x + blockMass.blockPos.x);
-
-			if (x <= 2) 
-			{
-				for(int j=0;j<4;j++)
-				{
-					if(b.tetrimino != I_TETRIMINO)
-					{
-						b.cubes[j].cubePos.x+=1;
+				if((blockMass.blockPos.x+1) >= x) {
+					for(int j = 1; j < 3; j++) {
+						if(!blockMass.there[y, x+j]) {
+							moveX = j;
+						}
 					}
-					else if(b.form[2,0]==true)
-					{
-						b.cubes[j].cubePos.x+=2;
-					}
-					else if(b.form[2,0]==false)
-					{
-						b.cubes[j].cubePos.x+=1;
+				} else {
+					for(int j = -1; j > -3; j--) {
+						if(!blockMass.there[y, x+j]) {
+							moveX = j;
+						}
 					}
 				}
-				break;
-			}
-			else if(x == 11)
-			{
-				for(int j=0;j<4;j++)
-				{
-					if(b.tetrimino != I_TETRIMINO)
-						b.cubes[j].cubePos.x-=1;
-					else if(b.form[2,0]==false)
-					{
-						b.cubes[j].cubePos.x-=2;
-					}
-					else if(b.form[2,0]==true)
-					{
-						b.cubes[j].cubePos.x-=1;
-					}
-				}
-				break;
 			}
 		}
-		
-		return b;
+
+		return moveX;
 	}
 
 	// ブロックを左回転させる
@@ -573,9 +543,11 @@ public class Tetrimino : MonoBehaviour {
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				else if(!CollisionKickWallBlocks(after, 0, 0))
-				{
-					block = KickWall(after);
+				int moveX = CollisionKickWallBlocks (after);
+				if(moveX != 0) {
+					block = after;
+					blockMass.blockPos.x += moveX;
+					block.pos.x += moveX;
 				}
 
 				if(playTime > 0.0f) {
@@ -630,9 +602,11 @@ public class Tetrimino : MonoBehaviour {
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				else if(!CollisionKickWallBlocks(after, 0, 0))
-				{
-					block = KickWall(after);
+				int moveX = CollisionKickWallBlocks (after);
+				if(moveX != 0) {
+					block = after;
+					blockMass.blockPos.x += moveX;
+					block.pos.x += moveX;
 				}
 
 				if(playTime > 0.0f) {
