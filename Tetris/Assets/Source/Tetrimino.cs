@@ -475,26 +475,62 @@ public class Tetrimino : MonoBehaviour {
 			x = (int)(cBlock.cubes[i].cubePos.x + blockMass.blockPos.x);
 			y = (int)(cBlock.cubes[i].cubePos.y + blockMass.blockPos.y);
 			if(x < 2) {
+				for(int j = 0; j < 4; j++) {
+					int cx = (int)(blockMass.blockPos.x + cBlock.cubes[j].cubePos.x + (2-x));
+					if(blockMass.there[y, cx]) {
+						return 0;
+					}
+				}
 				return 2-x;
 			}
-			if(x > 21) {
-				return 21-x;
+			if(x > 11) {
+				for(int j = 0; j < 4; j++) {
+					int cx = (int)(blockMass.blockPos.x + cBlock.cubes[j].cubePos.x + (11-x));
+					if(blockMass.there[y, cx]) {
+						return 0;
+					}
+				}
+				return 11-x;
 			}
 			if (blockMass.there [y, x]) {
 				if((blockMass.blockPos.x+1) >= x) {
 					for(int j = 1; j < 3; j++) {
-						if(!blockMass.there[y, x+j]) {
+						if(blockMass.there[y, x+j]) {
+							if(j >= 2) {
+								return 0;
+							}
+							continue;
+						} else {
 							moveX = j;
+							for(int k = 0; k < 4; k++) {
+								int cx = (int)(blockMass.blockPos.x + cBlock.cubes[k].cubePos.x + j);
+								if(cx > 11 || blockMass.there[y, cx]) {
+									return 0;
+								}
+							}
+							break;
 						}
 					}
 				} else {
 					for(int j = -1; j > -3; j--) {
-						if(!blockMass.there[y, x+j]) {
+						if(blockMass.there[y, x+j]) {
+							if(j <= -2) {
+								return 0;
+							}
+							continue;
+						} else {
+							for(int k = 0; k < 4; k++) {
+								int cx = (int)(blockMass.blockPos.x + cBlock.cubes[k].cubePos.x + j);
+								if(cx < 2 || blockMass.there[y, cx]) {
+									return 0;
+								}
+							}
 							moveX = j;
+							break;
 						}
 					}
 				}
-			}
+			} 
 		}
 
 		return moveX;
