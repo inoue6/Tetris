@@ -55,6 +55,8 @@ public class Tetrimino : MonoBehaviour {
 	public Material purpleMaterial;
 	public Material orangeMaterial;
 	public Material ghostMaterial;
+	public Material whiteMaterial;
+	public Material blackMaterial;
 
 	Block block;			// 落下してくるブロック
 	Blockmass blockMass;	// ブロックの塊
@@ -77,6 +79,9 @@ public class Tetrimino : MonoBehaviour {
 	float playTime;
 
 	bool blackCube;			// 一列そろった時の黒テトリミノの有無
+
+	float deleteTime = 0.0f;
+	bool deleteFlag;
 
 	// Use this for initialization
 	void Start () {
@@ -108,25 +113,30 @@ public class Tetrimino : MonoBehaviour {
 			return;
 		}
 
-		if (CollisionBlocks (block, 0, 1)) {
-			playTime += Time.deltaTime;
-		} else {
-			playTime = 0.0f;
+		if (!deleteFlag) {
+			if (CollisionBlocks (block, 0, 1)) {
+				playTime += Time.deltaTime;
+			} else {
+				playTime = 0.0f;
+			}
+
+			if (!generat && Input.GetKey (KeyCode.DownArrow)) {
+				block.spd = 0.01f;
+			}
+
+			if ((Time.time - spdTime) >= block.spd) {
+				FallTetrimino ();
+				spdTime = Time.time;
+			}
+
+			BlockMove ();
+
+			LeftRotateBlock ();
+			RightRotateBlock ();
+			
+			SetPosCube ();
+			BlockMassSetPosition ();
 		}
-
-		if (!generat && Input.GetKey (KeyCode.DownArrow)) {
-			block.spd = 0.01f;
-		}
-
-		if((Time.time - spdTime) >= block.spd) {
-			FallTetrimino ();
-			spdTime = Time.time;
-		}
-
-		BlockMove ();
-
-		LeftRotateBlock ();
-		RightRotateBlock ();
 
 		if (playTime > 0.0f) {
 			playTime += Time.deltaTime;
@@ -144,12 +154,18 @@ public class Tetrimino : MonoBehaviour {
 					}
 					blockMass.blocks [y, x] = block.cubes [i];
 				}
-				RemoveBlock ();
-
-				SetPosCube ();
-
-				GeneratTetrimino ();
+				deleteTime += Time.deltaTime;
 			}
+		}
+
+		if (deleteTime > 0.0f) {
+			ChangeColorRemoveBlock ();
+		}
+		if (!deleteFlag && (deleteTime > 0.0f)) {
+			SetPosCube ();
+			
+			GeneratTetrimino ();
+			deleteTime = 0.0f;
 		}
 
 		if (gameOver) {
@@ -169,11 +185,24 @@ public class Tetrimino : MonoBehaviour {
 			blockCount = 0;
 		}
 
-		SetPosCube ();
-		BlockMassSetPosition ();
-
-		if(!blackCube)
+		if (!deleteFlag) {
 			SetGhost ();
+		} else {
+			ghost1.transform.position = new Vector3(100, 100, 0);
+			ghost2.transform.position = new Vector3(100, 100, 0);
+			ghost3.transform.position = new Vector3(100, 100, 0);
+			ghost4.transform.position = new Vector3(100, 100, 0);
+		}
+
+		if (deleteTime >= 0.8f) {
+			RemoveBlock ();
+			
+			SetPosCube ();
+			
+			GeneratTetrimino ();
+			deleteFlag = false;
+			deleteTime = 0.0f;
+		}
 	}
 
 	// 形状の初期化
@@ -279,7 +308,7 @@ public class Tetrimino : MonoBehaviour {
 		if (CollisionBlocks (block, 0, 0)) {
 			if(gameOver)
 				return;
-
+			deleteTime += Time.deltaTime;
 			FallLastBlocks();
 			goto end;
 		}
@@ -477,20 +506,28 @@ public class Tetrimino : MonoBehaviour {
 			if(x < 2) {
 				for(int j = 0; j < 4; j++) {
 					int cx = (int)(blockMass.blockPos.x + cBlock.cubes[j].cubePos.x + (2-x));
-					if(blockMass.there[y, cx]) {
+					int cy = (int)(cBlock.cubes[j].cubePos.y + blockMass.blockPos.y);
+					if(blockMass.there[cy, cx]) {
 						return 0;
 					}
 				}
-				return 2-x;
+				if(moveX < 2-x) {
+					moveX = 2-x;
+				}
+				continue;
 			}
 			if(x > 11) {
 				for(int j = 0; j < 4; j++) {
 					int cx = (int)(blockMass.blockPos.x + cBlock.cubes[j].cubePos.x + (11-x));
-					if(blockMass.there[y, cx]) {
+					int cy = (int)(cBlock.cubes[j].cubePos.y + blockMass.blockPos.y);
+					if(blockMass.there[cy, cx]) {
 						return 0;
 					}
 				}
-				return 11-x;
+				if(moveX > 11-x) {
+					moveX = 11-x;
+				}
+				continue;
 			}
 			if (blockMass.there [y, x]) {
 				if((blockMass.blockPos.x+1) >= x) {
@@ -504,6 +541,7 @@ public class Tetrimino : MonoBehaviour {
 							moveX = j;
 							for(int k = 0; k < 4; k++) {
 								int cx = (int)(blockMass.blockPos.x + cBlock.cubes[k].cubePos.x + j);
+								int cy = (int)(cBlock.cubes[k].cubePos.y + blockMass.blockPos.y);
 								if(cx > 11 || blockMass.there[y, cx]) {
 									return 0;
 								}
@@ -521,6 +559,7 @@ public class Tetrimino : MonoBehaviour {
 						} else {
 							for(int k = 0; k < 4; k++) {
 								int cx = (int)(blockMass.blockPos.x + cBlock.cubes[k].cubePos.x + j);
+								int cy = (int)(cBlock.cubes[k].cubePos.y + blockMass.blockPos.y);
 								if(cx < 2 || blockMass.there[y, cx]) {
 									return 0;
 								}
@@ -669,6 +708,7 @@ public class Tetrimino : MonoBehaviour {
 	// 消えるブロックを黒くする
 	void ChangeColorRemoveBlock()
 	{
+		deleteTime += Time.deltaTime;
 		for (int i = 0; i < 4; i++) {
 			int y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
 			for (int j = 2; j < 12; j++) {
@@ -676,22 +716,17 @@ public class Tetrimino : MonoBehaviour {
 					break;
 				}
 				if (j == 11) {
+					deleteFlag = true;
 					Renderer renderer;
 					for (int x = 2; x < 12; x++) {
 						renderer = blockMass.blocks[y, x].cube.GetComponent<Renderer> ();
-						renderer.material.color = new Color (0.0f, 0.0f, 0.0f);
+						if((deleteTime < 0.15f) || 
+						   (deleteTime >= 0.3f && deleteTime > 0.45f)) {
+							renderer.material = whiteMaterial;
+						} else {
+							renderer.material = blackMaterial;
+						}
 					}
-					blackCube =true;
-
-					// ゴーストを透明にする
-					renderer = ghost1.GetComponent<Renderer> ();
-					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
-					renderer = ghost2.GetComponent<Renderer> ();
-					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
-					renderer = ghost3.GetComponent<Renderer> ();
-					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
-					renderer = ghost4.GetComponent<Renderer> ();
-					renderer.material.color = new Color (0.0f, 0.0f, 0.0f, 0.0f);
 				}
 			}
 		}
