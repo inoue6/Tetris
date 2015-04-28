@@ -573,7 +573,7 @@ public class Tetrimino : MonoBehaviour {
 								if(cx > 11) {
 									return 0;
 								}
-								if(blockMass.there[y, cx]) {
+								if(blockMass.there[cy, cx]) {
 									hit = true;
 								}
 							}
@@ -598,7 +598,7 @@ public class Tetrimino : MonoBehaviour {
 								if(cx < 2) {
 									return 0;
 								}
-								if(blockMass.there[y, cx]) {
+								if(blockMass.there[cy, cx]) {
 									hit = true;
 								}
 							}
@@ -609,7 +609,7 @@ public class Tetrimino : MonoBehaviour {
 						}
 					}
 				}
-			} 
+			}
 		}
 
 		return moveX;
@@ -641,7 +641,7 @@ public class Tetrimino : MonoBehaviour {
 				}
 
 				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
-				/*if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
 				{
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 2;
@@ -655,17 +655,17 @@ public class Tetrimino : MonoBehaviour {
 						after.cubes [i].cubePos.y += 1;
 					}
 					blockMass.blockPos.y += 1;
-				}*/
+				}
 		
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				/*int moveX = CollisionKickWallBlocks (after);
+				int moveX = CollisionKickWallBlocks (after);
 				if(moveX != 0) {
 					block = after;
 					blockMass.blockPos.x += moveX;
 					block.pos.x += moveX;
-				}*/
+				}
 
 				if(playTime > 0.0f) {
 					if(!CollisionBlocks (block, 0, 1)) {
@@ -702,7 +702,7 @@ public class Tetrimino : MonoBehaviour {
 				}
 				
 				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
-				/*if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
 				{
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 2;
@@ -714,17 +714,17 @@ public class Tetrimino : MonoBehaviour {
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 1;
 					}
-				}*/
+				}
 				
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				/*int moveX = CollisionKickWallBlocks (after);
+				int moveX = CollisionKickWallBlocks (after);
 				if(moveX != 0) {
 					block = after;
 					blockMass.blockPos.x += moveX;
 					block.pos.x += moveX;
-				}*/
+				}
 
 				if(playTime > 0.0f) {
 					if(!CollisionBlocks (block, 0, 1)) {
