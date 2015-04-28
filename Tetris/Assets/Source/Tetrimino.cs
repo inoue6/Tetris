@@ -107,8 +107,8 @@ public class Tetrimino : MonoBehaviour {
 			if(Input.GetKey(KeyCode.Return)) {
 				description = false;
 				texture.transform.position = new Vector3(100, 0, 0);
-				spdTime = Time.time;
-				moveSpdTime = Time.time;
+				spdTime = 0.0f;
+				moveSpdTime = 0.0f;
 			}
 			return;
 		}
@@ -124,10 +124,11 @@ public class Tetrimino : MonoBehaviour {
 				block.spd = 0.01f;
 			}
 
-			if ((Time.time - spdTime) >= block.spd) {
+			if (spdTime >= block.spd) {
 				FallTetrimino ();
-				spdTime = Time.time;
+				spdTime = 0.0f;
 			}
+			spdTime += Time.deltaTime;
 
 			BlockMove ();
 
@@ -135,14 +136,22 @@ public class Tetrimino : MonoBehaviour {
 			RightRotateBlock ();
 			
 			SetPosCube ();
-			BlockMassSetPosition ();
+			if(!gameOver) {
+				BlockMassSetPosition ();
+			}
 		}
 
 		if (playTime > 0.0f) {
 			playTime += Time.deltaTime;
 			if(playTime >= 0.5) {
 				playTime = 0.0f;
+				deleteTime += Time.deltaTime;
+			}
+		}
 
+		if (!deleteFlag && (deleteTime > 0.0f)) {
+			SetPosCube ();
+			if (CollisionBlocks (block, 0, 1)) {
 				int x;
 				int y;
 				for (int i = 0; i < 4; i++) {
@@ -154,19 +163,36 @@ public class Tetrimino : MonoBehaviour {
 					}
 					blockMass.blocks [y, x] = block.cubes [i];
 				}
-				deleteTime += Time.deltaTime;
+				ChangeColorRemoveBlock ();
+				if(!deleteFlag) {
+					GeneratTetrimino ();
+				}
+			} else {
+				playTime = 0.0f;
+				deleteTime = 0.0f;
 			}
 		}
 
-		if (deleteTime > 0.0f) {
+		if (deleteFlag) {
 			ChangeColorRemoveBlock ();
 		}
-		if (!deleteFlag && (deleteTime > 0.0f)) {
-			SetPosCube ();
-			
-			GeneratTetrimino ();
-			deleteTime = 0.0f;
-		}
+
+		/*if (deleteTime > 0.0f) {
+			if(!deleteFlag) {
+				int x;
+				int y;
+				for (int i = 0; i < 4; i++) {
+					x = (int)(block.cubes[i].cubePos.x + blockMass.blockPos.x);
+					y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
+					blockMass.there [y, x] = true;
+					if (blockMass.top > y) {
+						blockMass.top = y;
+					}
+					blockMass.blocks [y, x] = block.cubes [i];
+				}
+			}
+			ChangeColorRemoveBlock ();
+		}*/
 
 		if (gameOver) {
 			text.transform.position = new Vector3(0.12f, 0.7f, 0);
@@ -420,23 +446,25 @@ public class Tetrimino : MonoBehaviour {
 	// ブロックの移動
 	void BlockMove() {
 		if(	Input.GetKey(KeyCode.RightArrow) &&
-			((Time.time - moveSpdTime) >= moveSpd))
+			(moveSpdTime >= moveSpd))
 		{
 			if (!CollisionBlocks (block, 1, 0)) {
 				block.pos.x += 1.0f;
 				blockMass.blockPos.x += 1;
 			}
-			moveSpdTime = Time.time;
+			moveSpdTime = 0.0f;
 		}
 		if(	Input.GetKey(KeyCode.LeftArrow) &&
-		   ((Time.time - moveSpdTime) >= moveSpd))
+		   (moveSpdTime >= moveSpd))
 		{
 			if (!CollisionBlocks (block, -1, 0)) {
 				block.pos.x -= 1.0f;
 				blockMass.blockPos.x -= 1;
 			}
-			moveSpdTime = Time.time;
+			moveSpdTime = 0.0f;
 		}
+
+		moveSpdTime += Time.deltaTime;
 	}
 
 	// ブロック塊との当たり判定
@@ -632,12 +660,12 @@ public class Tetrimino : MonoBehaviour {
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				int moveX = CollisionKickWallBlocks (after);
+				/*int moveX = CollisionKickWallBlocks (after);
 				if(moveX != 0) {
 					block = after;
 					blockMass.blockPos.x += moveX;
 					block.pos.x += moveX;
-				}
+				}*/
 
 				if(playTime > 0.0f) {
 					if(!CollisionBlocks (block, 0, 1)) {
@@ -691,12 +719,12 @@ public class Tetrimino : MonoBehaviour {
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
 				}
-				int moveX = CollisionKickWallBlocks (after);
+				/*int moveX = CollisionKickWallBlocks (after);
 				if(moveX != 0) {
 					block = after;
 					blockMass.blockPos.x += moveX;
 					block.pos.x += moveX;
-				}
+				}*/
 
 				if(playTime > 0.0f) {
 					if(!CollisionBlocks (block, 0, 1)) {
