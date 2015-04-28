@@ -531,41 +531,53 @@ public class Tetrimino : MonoBehaviour {
 			}
 			if (blockMass.there [y, x]) {
 				if((blockMass.blockPos.x+1) >= x) {
-					for(int j = 1; j < 3; j++) {
+					for(int j = moveX; j < 3; j++) {
 						if(blockMass.there[y, x+j]) {
 							if(j >= 2) {
 								return 0;
 							}
 							continue;
 						} else {
-							moveX = j;
+							bool hit = false;
 							for(int k = 0; k < 4; k++) {
 								int cx = (int)(blockMass.blockPos.x + cBlock.cubes[k].cubePos.x + j);
 								int cy = (int)(cBlock.cubes[k].cubePos.y + blockMass.blockPos.y);
-								if(cx > 11 || blockMass.there[y, cx]) {
+								if(cx > 11) {
 									return 0;
 								}
+								if(blockMass.there[y, cx]) {
+									hit = true;
+								}
 							}
-							break;
+							if(moveX < j && !hit) {
+								moveX = j;
+								break;
+							}
 						}
 					}
 				} else {
-					for(int j = -1; j > -3; j--) {
+					for(int j = moveX; j > -3; j--) {
 						if(blockMass.there[y, x+j]) {
 							if(j <= -2) {
 								return 0;
 							}
 							continue;
 						} else {
+							bool hit = false;
 							for(int k = 0; k < 4; k++) {
 								int cx = (int)(blockMass.blockPos.x + cBlock.cubes[k].cubePos.x + j);
 								int cy = (int)(cBlock.cubes[k].cubePos.y + blockMass.blockPos.y);
-								if(cx < 2 || blockMass.there[y, cx]) {
+								if(cx < 2) {
 									return 0;
 								}
+								if(blockMass.there[y, cx]) {
+									hit = true;
+								}
 							}
-							moveX = j;
-							break;
+							if(moveX > j && !hit) {
+								moveX = j;
+								break;
+							}
 						}
 					}
 				}
@@ -601,11 +613,12 @@ public class Tetrimino : MonoBehaviour {
 				}
 
 				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
-				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				/*if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
 				{
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 2;
 					}
+					blockMass.blockPos.y += 2;
 				}
 				else if(((block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 1) ||
 				         (block.tetrimino != I_TETRIMINO && blockMass.blockPos.y == 0)))
@@ -613,7 +626,8 @@ public class Tetrimino : MonoBehaviour {
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 1;
 					}
-				}
+					blockMass.blockPos.y += 1;
+				}*/
 		
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
@@ -660,7 +674,7 @@ public class Tetrimino : MonoBehaviour {
 				}
 				
 				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
-				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				/*if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
 				{
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 2;
@@ -672,7 +686,7 @@ public class Tetrimino : MonoBehaviour {
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 1;
 					}
-				}
+				}*/
 				
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
