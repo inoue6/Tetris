@@ -177,23 +177,6 @@ public class Tetrimino : MonoBehaviour {
 			ChangeColorRemoveBlock ();
 		}
 
-		/*if (deleteTime > 0.0f) {
-			if(!deleteFlag) {
-				int x;
-				int y;
-				for (int i = 0; i < 4; i++) {
-					x = (int)(block.cubes[i].cubePos.x + blockMass.blockPos.x);
-					y = (int)(block.cubes[i].cubePos.y + blockMass.blockPos.y);
-					blockMass.there [y, x] = true;
-					if (blockMass.top > y) {
-						blockMass.top = y;
-					}
-					blockMass.blocks [y, x] = block.cubes [i];
-				}
-			}
-			ChangeColorRemoveBlock ();
-		}*/
-
 		if (gameOver) {
 			text.transform.position = new Vector3(0.12f, 0.7f, 0);
 			if(Input.GetKeyDown (KeyCode.Return)) {
@@ -641,7 +624,7 @@ public class Tetrimino : MonoBehaviour {
 				}
 
 				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
-				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				/*if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
 				{
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 2;
@@ -655,7 +638,7 @@ public class Tetrimino : MonoBehaviour {
 						after.cubes [i].cubePos.y += 1;
 					}
 					blockMass.blockPos.y += 1;
-				}
+				}*/
 		
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
@@ -702,7 +685,7 @@ public class Tetrimino : MonoBehaviour {
 				}
 				
 				// ブロックが生成されてすぐの時、回転でブロックが突き出てしまわないようにyの値を補正する
-				if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
+				/*if(block.tetrimino == I_TETRIMINO && blockMass.blockPos.y == 0)
 				{
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 2;
@@ -714,7 +697,7 @@ public class Tetrimino : MonoBehaviour {
 					for (int i = 0; i < 4; i++) {
 						after.cubes [i].cubePos.y += 1;
 					}
-				}
+				}*/
 				
 				if (!CollisionBlocks (after, 0, 0)) {
 					block = after;
